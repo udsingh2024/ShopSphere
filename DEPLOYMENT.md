@@ -41,7 +41,7 @@ graph TD
    * `JWT_SECRET` = `8a072ca7c5c46cb913bdae8db3ca64e12b6ec4363b72e55c3aa78e9c1d54ba8e`
    * `JWT_REFRESH_SECRET` = `bf6c27a0e2bbc5dba31f9aa624184eeccbeccfe32d12f0d0200a7232494259ba`
    * `GEMINI_API_KEY` = `your_gemini_api_key_here`
-   * `CLIENT_URL` = `https://your-frontend-name.vercel.app`
+   * `CLIENT_URL` = `https://shop-sphere-black-iota.vercel.app`
 5. Click **Create Web Service**.
 6. Copy your Render backend URL (e.g. `https://shopsphere-backend.onrender.com`).
 
