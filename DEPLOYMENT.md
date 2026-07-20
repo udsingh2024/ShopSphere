@@ -1,6 +1,6 @@
-# ShopSphere Production Deployment & Operations Guide
+# ShopSphere Production Deployment & Operations Guide (Vercel + Render)
 
-This guide contains deployment instructions, infrastructure setups, rollback checklists, and troubleshooting commands for the ShopSphere platform.
+This guide contains deployment instructions to deploy your frontend on **Vercel** and your backend on **Render**.
 
 ---
 
@@ -22,86 +22,45 @@ graph TD
 
 ---
 
-## 📦 Deployment Instructions
+## 📦 Step-by-Step Deployment Guide
 
-### 1. Frontend: Deploying to Vercel
-*   **Trigger**: Linked to GitHub repository. Vercel automatically deploys pushes to `main`.
-*   **Manual Deployment CLI**:
-    ```bash
-    npm install -g vercel
-    vercel --prod
-    ```
-*   **Environment Variables required**:
-    *   `VITE_API_URL`: Backend API origin (e.g. `https://shopsphere-api.onrender.com/api/v1`).
-    *   `VITE_SOCKET_URL`: Backend socket origin (e.g. `https://shopsphere-api.onrender.com`).
+### 1. Backend: Deploy to Render
 
-### 2. Backend: Deploying to Render
-*   Create a **Web Service** on Render, connecting your GitHub repository.
-*   **Build Command**: `cd server && npm install`
-*   **Start Command**: `cd server && node src/app.js`
-*   **Environment Variables**: Mount all critical secrets as defined in `SECURITY.md`.
-
-### 3. Database: MongoDB Atlas
-*   Set up a Free (Shared M0) or Paid cluster in your cloud provider.
-*   Whitelist Render's outbound server IP addresses or enable access from everywhere (`0.0.0.0/0`) with strong user credential passwords.
-*   Copy your database connection URL to `MONGO_URI` in the backend environment configs.
-
----
-
-## 🐳 Docker Container Operations
-
-We provide local and production containers.
-
-### 1. Local Orchestration (Docker Compose)
-To start the entire application stack locally (including database, server, and client services):
-```bash
-docker-compose up --build
-```
-
-### 2. Manual Container Build
-*   **Backend Server**:
-    ```bash
-    docker build -t shopsphere-backend ./server
-    docker run -p 5000:5000 --env-file ./server/.env shopsphere-backend
-    ```
-*   **Frontend Client**:
-    ```bash
-    docker build -t shopsphere-frontend ./client
-    docker run -p 80:80 shopsphere-frontend
-    ```
+1. Sign up/Log in to [Render.com](https://render.com/).
+2. Click **"New Web Service"** and connect your GitHub repository.
+3. Configure the web service settings:
+   * **Name**: `shopsphere-backend`
+   * **Root Directory**: `server`
+   * **Environment**: `Node`
+   * **Build Command**: `npm install`
+   * **Start Command**: `node src/app.js`
+4. Add the following **Environment Variables** in Render:
+   * `NODE_ENV` = `production`
+   * `PORT` = `5000`
+   * `MONGO_URI` = `mongodb+srv://usamrat2004_db_user:7GDSXOEmIyl1iIAJ@ac-h25mec1-shard-00-00.uys96fj.mongodb.net:27017,ac-h25mec1-shard-00-01.uys96fj.mongodb.net:27017,ac-h25mec1-shard-00-02.uys96fj.mongodb.net:27017/?ssl=true&replicaSet=atlas-tm1ovh-shard-0&authSource=admin&appName=Cluster0`
+   * `JWT_SECRET` = `8a072ca7c5c46cb913bdae8db3ca64e12b6ec4363b72e55c3aa78e9c1d54ba8e`
+   * `JWT_REFRESH_SECRET` = `bf6c27a0e2bbc5dba31f9aa624184eeccbeccfe32d12f0d0200a7232494259ba`
+   * `GEMINI_API_KEY` = `your_gemini_api_key_here`
+   * `CLIENT_URL` = `https://your-frontend-name.vercel.app`
+5. Click **Create Web Service**.
+6. Copy your Render backend URL (e.g. `https://shopsphere-backend.onrender.com`).
 
 ---
 
-## 📈 Monitoring & Health Checks
+### 2. Frontend: Deploy to Vercel
 
-Verify service status by calling these monitoring endpoints:
-
-*   **Uptime Diagnostics**: `GET /api/v1/health`
-    *   Returns memory allocation, process cpu time, and uptime metrics.
-*   **Ready Check**: `GET /api/v1/ready`
-    *   Verifies database connectivity before routing user traffic. Returns HTTP `503` if MongoDB is down.
-*   **Version Check**: `GET /api/v1/version`
-    *   Returns active package and node release versions.
-
----
-
-## 🚨 Emergency Disaster Recovery
-
-### 1. Deployment Rollback
-If a new release causes production outages, roll back to the last stable release:
-*   **Vercel**: Go to Vercel Dashboard -> Deployments -> Find last stable release -> Select "Promote to Production".
-*   **Render**: Go to Render Dashboard -> Web Service -> Deployments -> Select last successful deployment -> Click "Rollback".
-
-### 2. Database Restoration
-Restore backup data from private S3 archives:
-```bash
-mongorestore --uri="mongodb+srv://..." --archive=/backups/db-stable.archive --gzip
-```
+1. Sign up/Log in to [Vercel.com](https://vercel.com/).
+2. Click **"Add New Project"** and import your GitHub repository.
+3. Configure project settings:
+   * **Framework Preset**: `Vite`
+   * **Root Directory**: `client`
+4. Add the following **Environment Variables** in Vercel:
+   * `VITE_API_URL` = `https://shopsphere-backend.onrender.com/api/v1` *(Replace with your Render URL)*
+   * `VITE_SOCKET_URL` = `https://shopsphere-backend.onrender.com` *(Replace with your Render URL)*
+5. Click **Deploy**.
 
 ---
 
-## 🚀 Horizontal Scaling Considerations
+### 3. Database: MongoDB Atlas Configuration
 
-1.  **Backend Web Services**: Scale backend instances horizontally. If multiple server nodes are deployed, set up an **IP sticky session router** or use a **Redis Adapter** for Socket.IO (`@socket.io/redis-adapter`) to sync websocket messages across nodes.
-2.  **Database Scaling**: Enable shard clustering on MongoDB Atlas to distribute write logs.
-3.  **Static Assets**: Enable Cloudinary CDN image optimizations.
+1. In MongoDB Atlas, ensure your cluster IP Whitelist includes `0.0.0.0/0` under **Network Access** so Render's cloud servers can connect.

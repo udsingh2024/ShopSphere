@@ -31,10 +31,24 @@ const ChatMessage = require('./models/ChatMessage');
 const app = express();
 const server = http.createServer(app);
 
+// Dynamic CORS checker to support Vercel frontend deployments and local dev
+const corsOriginChecker = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  if (
+    origin === process.env.CLIENT_URL ||
+    origin.endsWith('.vercel.app') ||
+    origin.endsWith('.loca.lt') ||
+    origin.includes('localhost')
+  ) {
+    return callback(null, true);
+  }
+  return callback(null, true); // Allow request
+};
+
 // Configure Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: corsOriginChecker,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   },
@@ -45,42 +59,12 @@ app.set('io', io);
 
 // Security and utility Middlewares
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: [
-        "'self'", 
-        "data:", 
-        "blob:", 
-        "https://*.cloudinary.com", 
-        "https://*.unsplash.com", 
-        "https://images.unsplash.com",
-        "https://*.razorpay.com"
-      ],
-      connectSrc: [
-        "'self'", 
-        "ws://localhost:5000", 
-        "wss://localhost:5000",
-        "ws://localhost:5001",
-        "wss://localhost:5001",
-        "http://localhost:5000",
-        "http://localhost:5001",
-        "https://*.razorpay.com",
-        "https://*.cloudinary.com"
-      ],
-      frameSrc: ["'self'", "https://*.razorpay.com"],
-      objectSrc: ["'none'"],
-      upgradeInsecureRequests: [],
-    },
-  },
+  contentSecurityPolicy: false,
 }));
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: corsOriginChecker,
     credentials: true,
   })
 );

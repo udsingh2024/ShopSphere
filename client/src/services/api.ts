@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'https://shopsphere-p1o1.onrender.com/api/v1',
   withCredentials: true,
   headers: {},
 });
