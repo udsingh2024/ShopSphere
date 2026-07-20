@@ -1,0 +1,43 @@
+{
+  "name": "shopsphere-server",
+  "version": "1.0.0",
+  "description": "Production-ready backend API for ShopSphere",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "seed": "node src/utils/seed.js",
+    "test": "node src/utils/test_auth.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.2.0",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^8.6.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.4.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.13",
+    "pdfkit": "^0.19.1",
+    "razorpay": "^2.9.8",
+    "socket.io": "^4.7.5",
+    "winston": "^3.19.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0",
+    "nodemon": "^3.1.2",
+    "socket.io-client": "^4.8.3",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.10"
+  },
+  "license": "ISC"
+}

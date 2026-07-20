@@ -1,0 +1,47 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, master, development ]
+  pull_request:
+    branches: [ main, master, development ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Client tests and build
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Run Client Unit Tests
+        run: |
+          cd client
+          npx vitest run
+
+      - name: Compile Client Build
+        run: |
+          cd client
+          npm run build
+
+      # Server tests
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm ci
+
+      - name: Run Server Unit Tests
+        run: |
+          cd server
+          npx vitest run
