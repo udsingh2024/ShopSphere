@@ -34,8 +34,10 @@ const server = http.createServer(app);
 // Dynamic CORS checker to support Vercel frontend deployments and local dev
 const corsOriginChecker = (origin, callback) => {
   if (!origin) return callback(null, true);
+  const normalizedClientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : '';
+  const normalizedOrigin = origin.replace(/\/$/, '');
   if (
-    origin === process.env.CLIENT_URL ||
+    normalizedOrigin === normalizedClientUrl ||
     origin.endsWith('.vercel.app') ||
     origin.endsWith('.loca.lt') ||
     origin.includes('localhost')
