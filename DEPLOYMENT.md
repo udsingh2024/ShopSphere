@@ -43,7 +43,7 @@ graph TD
    * `GEMINI_API_KEY` = `your_gemini_api_key_here`
    * `CLIENT_URL` = `https://shop-sphere-b7041ww6c-udays-projects-17471c0d.vercel.app`
 5. Click **Create Web Service**.
-6. Copy your Render backend URL (e.g. `https://shopsphere-backend.onrender.com`).
+6. Copy your Render backend URL: `https://shopsphere-1-9nmq.onrender.com`.
 
 ---
 
@@ -55,8 +55,8 @@ graph TD
    * **Framework Preset**: `Vite`
    * **Root Directory**: `client`
 4. Add the following **Environment Variables** in Vercel:
-   * `VITE_API_URL` = `https://shopsphere-backend.onrender.com/api/v1` *(Replace with your Render URL)*
-   * `VITE_SOCKET_URL` = `https://shopsphere-backend.onrender.com` *(Replace with your Render URL)*
+   * `VITE_API_URL` = `https://shopsphere-1-9nmq.onrender.com/api/v1`
+   * `VITE_SOCKET_URL` = `https://shopsphere-1-9nmq.onrender.com`
 5. Click **Deploy**.
 
 ---

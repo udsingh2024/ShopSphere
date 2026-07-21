@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://shopsphere-p1o1.onrender.com/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'https://shopsphere-1-9nmq.onrender.com/api/v1',
   withCredentials: true,
   headers: {},
 });
@@ -46,7 +46,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+
     // Check if error matches our expired token code
     if (
       error.response?.status === 401 &&
@@ -74,24 +74,24 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
         const { accessToken: newAccessToken } = response.data;
-        
+
         setAccessToken(newAccessToken);
-        
+
         // Update header
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        
+
         processQueue(null, newAccessToken);
         isRefreshing = false;
-        
+
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         isRefreshing = false;
-        
+
         // Clear active tokens and emit custom logout event to clear Redux state
         setAccessToken('');
         window.dispatchEvent(new Event('auth:logout'));
-        
+
         return Promise.reject(refreshError);
       }
     }
