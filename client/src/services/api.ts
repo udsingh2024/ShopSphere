@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+let rawBaseUrl = (import.meta.env.VITE_API_URL || 'https://shopsphere-1-9nmq.onrender.com/api/v1').trim();
+if (rawBaseUrl && !rawBaseUrl.endsWith('/api/v1')) {
+  rawBaseUrl = rawBaseUrl.replace(/\/$/, '') + '/api/v1';
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://shopsphere-1-9nmq.onrender.com/api/v1',
+  baseURL: rawBaseUrl,
   withCredentials: true,
   headers: {},
 });

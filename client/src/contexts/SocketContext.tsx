@@ -12,7 +12,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'https://shopsphere-1-9nmq.onrender.com';
+    let socketUrl = (import.meta.env.VITE_SOCKET_URL || 'https://shopsphere-1-9nmq.onrender.com').trim();
+    socketUrl = socketUrl.replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
     const newSocket = io(socketUrl, {
       withCredentials: true,
       autoConnect: false, // Let auth state control connection dynamically

@@ -70,6 +70,7 @@ app.use(
     credentials: true,
   })
 );
+app.options('*', cors({ origin: corsOriginChecker, credentials: true }));
 
 app.use(compression());
 app.use(morgan('dev'));
