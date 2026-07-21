@@ -6,10 +6,13 @@ const Refund = require('../models/Refund');
 const Transaction = require('../models/Transaction');
 const logger = require('../utils/logger');
 
+const getRazorpayKeyId = () => process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_KEY || 'rzp_test_mockkey';
+const getRazorpayKeySecret = () => process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || process.env.RAZORPAY_SECERET_KEY || 'mock_secret';
+
 // Setup Razorpay
 const getRazorpayInstance = () => {
-  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_mockkey';
-  const key_secret = process.env.RAZORPAY_KEY_SECRET || 'mock_secret';
+  const key_id = getRazorpayKeyId();
+  const key_secret = getRazorpayKeySecret();
   
   return new Razorpay({
     key_id,
@@ -47,7 +50,8 @@ const createRefund = async (req, res, next) => {
       try {
         const rzp = getRazorpayInstance();
         
-        if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID !== 'rzp_test_mockkey') {
+        const keyId = getRazorpayKeyId();
+        if (keyId && keyId !== 'rzp_test_mockkey') {
           const rzpRefund = await rzp.payments.refund(payment.razorpayPaymentId, {
             amount: Math.round(amount * 100), // convert to paise
             notes: {

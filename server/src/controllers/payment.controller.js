@@ -13,10 +13,13 @@ const { sendOrderConfirmation, sendPaymentFailed, sendRefundConfirmation } = req
 const logger = require('../utils/logger');
 const socketEvents = require('../socket/socketEvents');
 
+const getRazorpayKeyId = () => process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_KEY || 'rzp_test_mockkey';
+const getRazorpayKeySecret = () => process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || process.env.RAZORPAY_SECERET_KEY || 'mock_secret';
+
 // Initialize Razorpay
 const getRazorpayInstance = () => {
-  const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_mockkey';
-  const key_secret = process.env.RAZORPAY_KEY_SECRET || 'mock_secret';
+  const key_id = getRazorpayKeyId();
+  const key_secret = getRazorpayKeySecret();
   
   return new Razorpay({
     key_id,
@@ -41,7 +44,8 @@ const createRazorpayOrder = async (req, res, next) => {
 
     let razorpayOrderId = `order_rzp_mock_${Date.now()}`;
     
-    if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID !== 'rzp_test_mockkey') {
+    const keyId = getRazorpayKeyId();
+    if (keyId && keyId !== 'rzp_test_mockkey') {
       try {
         const rzp = getRazorpayInstance();
         const rzpOrder = await rzp.orders.create({
@@ -66,7 +70,7 @@ const createRazorpayOrder = async (req, res, next) => {
       razorpayOrderId,
       amount: amountInINR, // amount in INR
       currency: 'INR',
-      key: process.env.RAZORPAY_KEY_ID || 'rzp_test_mockkey',
+      key: keyId,
     });
   } catch (error) {
     next(error);
@@ -96,7 +100,7 @@ const verifyPayment = async (req, res, next) => {
 
     // 1. Signature Verification for Online payments
     if (razorpaySignature) {
-      const key_secret = process.env.RAZORPAY_KEY_SECRET || 'mock_secret';
+      const key_secret = getRazorpayKeySecret();
       const expectedSignature = crypto
         .createHmac('sha256', key_secret)
         .update(`${razorpayOrderId}|${razorpayPaymentId}`)

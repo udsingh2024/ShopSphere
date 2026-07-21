@@ -5,31 +5,45 @@ const cloudinary = require('cloudinary').v2;
 const logger = require('../utils/logger');
 const crypto = require('crypto');
 
-// Simple promise uploader matching project patterns
-const uploadToCloudinary = (fileBuffer) => {
-  return new Promise((resolve, reject) => {
+// Simple promise uploader with resilient fallback handling
+const uploadToCloudinary = (fileBuffer, mimeType = 'image/jpeg') => {
+  return new Promise((resolve) => {
+    const base64Data = fileBuffer ? fileBuffer.toString('base64') : '';
+    const fallbackDataUrl = base64Data ? `data:${mimeType};base64,${base64Data}` : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80';
+
     if (!process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME === 'your_cloud_name') {
-      logger.warn('Cloudinary not configured. Mocking visual search image URL.');
+      logger.warn('Cloudinary not configured. Using data URI fallback for visual search.');
       return resolve({
-        url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80',
-        publicId: `mock_search_${Date.now()}`
+        url: fallbackDataUrl,
+        publicId: `fallback_search_${Date.now()}`
       });
     }
 
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: 'shopsphere_searches' },
-      (error, result) => {
-        if (error) {
-          logger.error(`Cloudinary upload failed: ${error.message}`);
-          return reject(error);
+    try {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'shopsphere_searches' },
+        (error, result) => {
+          if (error) {
+            logger.warn(`Cloudinary upload notice (${error.message}). Resiliently using data URI fallback.`);
+            return resolve({
+              url: fallbackDataUrl,
+              publicId: `fallback_search_${Date.now()}`
+            });
+          }
+          resolve({
+            url: result.secure_url,
+            publicId: result.public_id,
+          });
         }
-        resolve({
-          url: result.secure_url,
-          publicId: result.public_id,
-        });
-      }
-    );
-    stream.end(fileBuffer);
+      );
+      stream.end(fileBuffer);
+    } catch (err) {
+      logger.warn(`Cloudinary stream creation exception (${err.message}). Using data URI fallback.`);
+      resolve({
+        url: fallbackDataUrl,
+        publicId: `fallback_search_${Date.now()}`
+      });
+    }
   });
 };
 
@@ -50,8 +64,8 @@ const visualSearch = async (req, res, next) => {
     const fileBuffer = req.file.buffer;
     const mimeType = req.file.mimetype;
 
-    // Upload to Cloudinary to get permanent URL
-    const uploadResult = await uploadToCloudinary(fileBuffer);
+    // Upload to Cloudinary to get permanent URL (or base64 fallback)
+    const uploadResult = await uploadToCloudinary(fileBuffer, mimeType);
 
     // Call Gemini Vision to extract features
     const analysis = await aiService.analyzeProductImage(fileBuffer, mimeType);
