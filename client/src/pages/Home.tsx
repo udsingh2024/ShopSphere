@@ -96,6 +96,7 @@ const Home: React.FC = () => {
           category: selectedCategory || undefined,
           search: searchQuery || undefined,
           sort: sortOption || undefined,
+          limit: 50,
         },
       });
       return res.data;

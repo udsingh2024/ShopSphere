@@ -58,7 +58,7 @@ const uploadToCloudinary = (fileBuffer) => {
 
 const getProducts = async (req, res, next) => {
   try {
-    const { category, search, minPrice, maxPrice, sort, page = 1, limit = 10 } = req.query;
+    const { category, search, minPrice, maxPrice, sort, page = 1, limit = 50 } = req.query;
     
     const cacheKey = `products:query:${JSON.stringify({ category, search, minPrice, maxPrice, sort, page, limit })}`;
     const cachedResults = await CacheService.get(cacheKey);
@@ -79,7 +79,7 @@ const getProducts = async (req, res, next) => {
       limit,
     });
 
-    await CacheService.set(cacheKey, results, 300); // Cache queries for 5 mins
+    await CacheService.set(cacheKey, results, 60); // Cache queries for 1 min
 
     res.json({
       success: true,
